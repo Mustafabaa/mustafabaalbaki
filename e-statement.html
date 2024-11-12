@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Movement Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f4f8; /* Light background */
+            color: #343a40; /* Dark text */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center items horizontally */
+        }
+
+        header {
+            text-align: center;
+            background-color: #007bff; /* Blue header */
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+        }
+
+        .date-container {
+            margin: 20px 0;
+        }
+
+        .date-container input[type="date"] {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .nav-buttons {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center; /* Center buttons */
+        }
+
+        .nav-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 15px 25px; /* Increased padding for larger buttons */
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 18px; /* Larger font size for buttons */
+            margin: 0 5px; /* Space between buttons */
+        }
+
+        .nav-button:hover {
+            background-color: #0056b3;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: auto;
+            max-width: 1200px;
+        }
+
+        .box {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 30px; 
+            flex: 1 1 45%;
+            margin: 15px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .total {
+            font-weight: bold;
+            font-size: 1.25em;
+            margin-top: 20px;
+            color: #28a745;
+            text-align: right;
+        }
+
+        .cash-movement {
+            background-color: #ffc107; /* Yellow background */
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .summary-section {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-row {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .add-row:hover {
+            background-color: #0056b3;
+        }
+
+        .summary-totals {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        .summary-item {
+            flex: 1;
+            text-align: center;
+            padding: 5px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            margin: 0 5px;
+        }
+
+        .summary-item strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .grand-total-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .grand-total-box {
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+            flex: 1;
+            background-color: #e9ecef; /* Light background for totals */
+        }
+
+        .grand-total-box.positive {
+            background-color: #d4edda; /* Light green */
+        }
+
+        .grand-total-box.negative {
+            background-color: #f8d7da; /* Light red */
+        }
+
+        .grand-total-box strong {
+            font-size: 1em; /* Smaller font size for labels */
+        }
+
+        .settlement-box {
+            border: 2px solid #007bff; /* Border color */
+            border-radius: 5px;
+            padding: 30px; /* Increased padding for larger size */
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold; /* Make text bold */
+            flex: 1; /* Flex property for better alignment */
+            min-width: 200px; /* Minimum width to ensure medium size */
+        }
+
+        .settlement-difference {
+            border: 2px solid #007bff; /* Border color */
+            border-radius: 5px;
+            padding: 30px; /* Padding for the new box */
+            margin: 20px 0; /* Margin for spacing */
+            text-align: center;
+            font-weight: bold; /* Make text bold */
+            flex: 1; /* Flex property for better alignment */
+            min-width: 200px; /* Minimum width to ensure medium size */
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        @media (max-width: 600px) {
+            .box {
+                flex: 1 1 100%;
+            }
+            .summary-totals {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background"></div>
+
+    <header>
+        <h1>Cash Movement Tracker</h1>
+    </header>
+
+    <div class="date-container">
+        <input type="date" id="date-input" placeholder="Select Date">
+    </div>
+
+    <div class="nav-buttons">
+        <button class="nav-button">Saved Tables</button>
+        <button class="nav-button">Tools</button>
+        <button class="nav-button">Logout</button>
+    </div>
+
+    <main>
+        <div class="container">
+            <div class="box">
+                <h2>USD Cash</h2>
+                <table>
+                    <tr><th>Category</th><th>Count</th><th>Amount</th></tr>
+                    <tr><td>$1</td><td><input type="text" id="usd-count-1" value="0" oninput="formatInput(this)"></td><td>$<span id="usd-amount-1">0.00</span></td></tr>
+                    <tr><td>$5</td><td><input type="text" id="usd-count-5" value="0" oninput="formatInput(this)"></td><td>$<span id="usd-amount-5">0.00</span></td></tr>
+                    <tr><td>$10</td><td><input type="text" id="usd-count-10" value="0" oninput="formatInput(this)"></td><td>$<span id="usd-amount-10">0.00</span></td></tr>
+                    <tr><td>$20</td><td><input type="text" id="usd-count-20" value="0" oninput="formatInput(this)"></td><td>$<span id="usd-amount-20">0.00</span></td></tr>
+                    <tr><td>$50</td><td><input type="text" id="usd-count-50" value="0" oninput="formatInput(this)"></td><td>$<span id="usd-amount-50">0.00</span></td></tr>
+                    <tr><td>$100</td><td><input type="text" id="usd-count-100" value="0" oninput="formatInput(this)"></td><td>$<span id="usd-amount-100">0.00</span></td></tr>
+                    <tr><td>Total</td><td colspan="2" class="total">$<span id="total-usd">0.00</span></td></tr>
+                </table>
+                <label for="usd-input-1">قيد صندوق دولار:</label>
+                <input type="text" id="usd-input-1" placeholder="Enter additional info">
+                <label for="usd-input-2">قيد كشف دولار:</label>
+                <input type="text" id="usd-input-2" placeholder="Enter additional info">
+                
+                <div class="cash-movement">
+                    <h3>USD Cash Movement</h3>
+                    <p>Total USD Cash: $<span id="morning-cash-usd">0.00</span></p>
+                </div>
+            </div>
+            
+            <div class="box">
+                <h2>LBP Cash</h2>
+                <table>
+                    <tr><th>Category</th><th>Count</th><th>Amount</th></tr>
+                    <tr><td>1000 LBP</td><td><input type="text" id="lbp-count-1000" value="0" oninput="formatInput(this)"></td><td><span id="lbp-amount-1000">0</span> LBP</td></tr>
+                    <tr><td>5000 LBP</td><td><input type="text" id="lbp-count-5000" value="0" oninput="formatInput(this)"></td><td><span id="lbp-amount-5000">0</span> LBP</td></tr>
+                    <tr><td>10000 LBP</td><td><input type="text" id="lbp-count-10000" value="0" oninput="formatInput(this)"></td><td><span id="lbp-amount-10000">0</span> LBP</td></tr>
+                    <tr><td>20000 LBP</td><td><input type="text" id="lbp-count-20000" value="0" oninput="formatInput(this)"></td><td><span id="lbp-amount-20000">0</span> LBP</td></tr>
+                    <tr><td>50000 LBP</td><td><input type="text" id="lbp-count-50000" value="0" oninput="formatInput(this)"></td><td><span id="lbp-amount-50000">0</span> LBP</td></tr>
+                    <tr><td>100000 LBP</td><td><input type="text" id="lbp-count-100000" value="0" oninput="formatInput(this)"></td><td><span id="lbp-amount-100000">0</span> LBP</td></tr>
+                    <tr><td>Total</td><td colspan="2" class="total"><span id="total-lbp">0</span> LBP</td></tr>
+                </table>
+                <label for="lbp-input-1">قيد صندوق لبناني:</label>
+                <input type="text" id="lbp-input-1" placeholder="Enter additional info">
+                <label for="lbp-input-2">قيد كشف لبناني:</label>
+                <input type="text" id="lbp-input-2" placeholder="Enter additional info">
+                
+                <div class="cash-movement">
+                    <h3>LBP Cash Movement</h3>
+                    <p>Total LBP Cash: <span id="morning-cash-lbp">0</span> LBP</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-section">
+            <button class="add-row" onclick="addRow()">Add Row</button>
+            <table class="summary-table">
+                <tr>
+                    <th>Account</th>
+                    <th>Paid / IN / Debit ($)</th>
+                    <th>Received / OUT / Credit ($)</th>
+                    <th>Account</th>
+                    <th>Paid / IN / Debit (LBP)</th>
+                    <th>Received / OUT / Credit (LBP)</th>
+                </tr>
+                <tr>
+                    <td><input type="text" placeholder="Input"></td>
+                    <td><input type="text" placeholder="0" oninput="formatInput(this); updateSummaryTotals()"></td>
+                    <td><input type="text" placeholder="0" oninput="formatInput(this); updateSummaryTotals()"></td>
+                    <td><input type="text" placeholder="Input"></td>
+                    <td><input type="text" placeholder="0" oninput="formatInput(this); updateSummaryTotals()"></td>
+                    <td><input type="text" placeholder="0" oninput="formatInput(this); updateSummaryTotals()"></td>
+                </tr>
+            </table>
+            <div class="summary-totals">
+                <div class="summary-item">
+                    <strong>Total Paid / IN / Debit:</strong>
+                    $<span id="total-debit">0.00</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Total Received / OUT / Credit:</strong>
+                    $<span id="total-credit">0.00</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Total Paid / IN / Debit (LBP):</strong>
+                    LBP <span id="total-lbp-debit">0.00</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Total Received / OUT / Credit (LBP):</strong>
+                    LBP <span id="total-lbp-credit">0.00</span>
+                </div>
+            </div>
+            <div class="grand-total-container">
+                <div class="grand-total-box" id="grand-total-box-usd">
+                    <strong>Grand Total (USD):</strong>
+                    <span class="grand-total" id="grand-total">0.00</span>
+                </div>
+                <div class="grand-total-box" id="grand-total-box-lbp">
+                    <strong>Grand Total (LBP):</strong>
+                    <span class="grand-total" id="grand-total-lbp">0.00</span>
+                </div>
+            </div>
+            <div class="grand-total-container">
+                <div class="grand-total-box" id="evening-total-box-usd">
+                    <strong>Evening Box (USD):</strong>
+                    <span class="grand-total" id="evening-total-usd">0.00</span>
+                </div>
+                <div class="grand-total-box" id="evening-total-box-lbp">
+                    <strong>Evening Box (LBP):</strong>
+                    <span class="grand-total" id="evening-total-lbp">0.00</span>
+                </div>
+            </div>
+            <!-- New Settlement Boxes -->
+            <div class="grand-total-container">
+                <div class="settlement-box">
+                    <strong>Settlement $</strong>
+                    <span class="grand-total" id="settlement-usd">0.00</span>
+                </div>
+                <div class="settlement-difference">
+                    <strong>Settlements Difference</strong>
+                    <span class="grand-total" id="settlements-difference">0.00</span>
+                </div>
+                <div class="settlement-box">
+                    <strong>Settlement LBP</strong>
+                    <span class="grand-total" id="settlement-lbp">0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Cash Boxes at the Bottom -->
+        <div class="container">
+            <div class="box">
+                <h2>New USD Cash</h2>
+                <table>
+                    <tr><th>Category</th><th>Count</th><th>Amount</th></tr>
+                    <tr><td>$1</td><td><input type="text" id="new-usd-count-1" value="0" oninput="formatInput(this)"></td><td>$<span id="new-usd-amount-1">0.00</span></td></tr>
+                    <tr><td>$5</td><td><input type="text" id="new-usd-count-5" value="0" oninput="formatInput(this)"></td><td>$<span id="new-usd-amount-5">0.00</span></td></tr>
+                    <tr><td>$10</td><td><input type="text" id="new-usd-count-10" value="0" oninput="formatInput(this)"></td><td>$<span id="new-usd-amount-10">0.00</span></td></tr>
+                    <tr><td>$20</td><td><input type="text" id="new-usd-count-20" value="0" oninput="formatInput(this)"></td><td>$<span id="new-usd-amount-20">0.00</span></td></tr>
+                    <tr><td>$50</td><td><input type="text" id="new-usd-count-50" value="0" oninput="formatInput(this)"></td><td>$<span id="new-usd-amount-50">0.00</span></td></tr>
+                    <tr><td>$100</td><td><input type="text" id="new-usd-count-100" value="0" oninput="formatInput(this)"></td><td>$<span id="new-usd-amount-100">0.00</span></td></tr>
+                    <tr><td>Total</td><td colspan="2" class="total">$<span id="new-total-usd">0.00</span></td></tr>
+                </table>
+            </div>
+            <div class="box">
+                <h2>New LBP Cash</h2>
+                <table>
+                    <tr><th>Category</th><th>Count</th><th>Amount</th></tr>
+                    <tr><td>1000 LBP</td><td><input type="text" id="new-lbp-count-1000" value="0" oninput="formatInput(this)"></td><td><span id="new-lbp-amount-1000">0</span> LBP</td></tr>
+                    <tr><td>5000 LBP</td><td><input type="text" id="new-lbp-count-5000" value="0" oninput="formatInput(this)"></td><td><span id="new-lbp-amount-5000">0</span> LBP</td></tr>
+                    <tr><td>10000 LBP</td><td><input type="text" id="new-lbp-count-10000" value="0" oninput="formatInput(this)"></td><td><span id="new-lbp-amount-10000">0</span> LBP</td></tr>
+                    <tr><td>20000 LBP</td><td><input type="text" id="new-lbp-count-20000" value="0" oninput="formatInput(this)"></td><td><span id="new-lbp-amount-20000">0</span> LBP</td></tr>
+                    <tr><td>50000 LBP</td><td><input type="text" id="new-lbp-count-50000" value="0" oninput="formatInput(this)"></td><td><span id="new-lbp-amount-50000">0</span> LBP</td></tr>
+                    <tr><td>100000 LBP</td><td><input type="text" id="new-lbp-count-100000" value="0" oninput="formatInput(this)"></td><td><span id="new-lbp-amount-100000">0</span> LBP</td></tr>
+                    <tr><td>Total</td><td colspan="2" class="total"><span id="new-total-lbp">0</span> LBP</td></tr>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Cash Movement Tracker. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function formatInput(input) {
+            let value = input.value.replace(/,/g, '');
+            if (!isNaN(value) && value !== '') {
+                input.value = formatNumber(value);
+            } else {
+                input.value = '';
+            }
+            updateTotals();
+        }
+
+        function updateTotals() {
+            let totalUsd = 0;
+            let totalLbp = 0;
+
+            // USD Calculation
+            totalUsd += parseInt(document.getElementById('usd-count-1').value.replace(/,/g, '') || 0) * 1;
+            totalUsd += parseInt(document.getElementById('usd-count-5').value.replace(/,/g, '') || 0) * 5;
+            totalUsd += parseInt(document.getElementById('usd-count-10').value.replace(/,/g, '') || 0) * 10;
+            totalUsd += parseInt(document.getElementById('usd-count-20').value.replace(/,/g, '') || 0) * 20;
+            totalUsd += parseInt(document.getElementById('usd-count-50').value.replace(/,/g, '') || 0) * 50;
+            totalUsd += parseInt(document.getElementById('usd-count-100').value.replace(/,/g, '') || 0) * 100;
+
+            document.getElementById('total-usd').innerText = formatNumber(totalUsd.toFixed(2));
+            document.getElementById('morning-cash-usd').innerText = formatNumber(totalUsd.toFixed(2)); // Update USD Cash Movement
+
+            // LBP Calculation
+            totalLbp += parseInt(document.getElementById('lbp-count-1000').value.replace(/,/g, '') || 0) * 1000;
+            totalLbp += parseInt(document.getElementById('lbp-count-5000').value.replace(/,/g, '') || 0) * 5000;
+            totalLbp += parseInt(document.getElementById('lbp-count-10000').value.replace(/,/g, '') || 0) * 10000;
+            totalLbp += parseInt(document.getElementById('lbp-count-20000').value.replace(/,/g, '') || 0) * 20000;
+            totalLbp += parseInt(document.getElementById('lbp-count-50000').value.replace(/,/g, '') || 0) * 50000;
+            totalLbp += parseInt(document.getElementById('lbp-count-100000').value.replace(/,/g, '') || 0) * 100000;
+
+            document.getElementById('total-lbp').innerText = formatNumber(totalLbp.toFixed(0));
+            document.getElementById('morning-cash-lbp').innerText = formatNumber(totalLbp.toFixed(0)); // Update LBP Cash Movement
+
+            // Update Grand Total for USD
+            const totalCredit = parseFloat(document.getElementById('total-credit').innerText.replace(/,/g, '') || 0);
+            const grandTotalUsd = totalCredit - totalUsd;
+            document.getElementById('grand-total').innerText = formatNumber(grandTotalUsd.toFixed(2));
+            updateGrandTotalBox(grandTotalUsd, 'grand-total-box-usd');
+
+            // Update Grand Total for LBP
+            const totalLbpCredit = parseFloat(document.getElementById('total-lbp-credit').innerText.replace(/,/g, '') || 0);
+            const grandTotalLbp = totalLbpCredit - totalLbp;
+            document.getElementById('grand-total-lbp').innerText = formatNumber(grandTotalLbp.toFixed(0));
+            updateGrandTotalBox(grandTotalLbp, 'grand-total-box-lbp');
+
+            // New USD cash calculation
+            let newTotalUsd = 0;
+            newTotalUsd += parseInt(document.getElementById('new-usd-count-1').value.replace(/,/g, '') || 0) * 1;
+            newTotalUsd += parseInt(document.getElementById('new-usd-count-5').value.replace(/,/g, '') || 0) * 5;
+            newTotalUsd += parseInt(document.getElementById('new-usd-count-10').value.replace(/,/g, '') || 0) * 10;
+            newTotalUsd += parseInt(document.getElementById('new-usd-count-20').value.replace(/,/g, '') || 0) * 20;
+            newTotalUsd += parseInt(document.getElementById('new-usd-count-50').value.replace(/,/g, '') || 0) * 50;
+            newTotalUsd += parseInt(document.getElementById('new-usd-count-100').value.replace(/,/g, '') || 0) * 100;
+
+            document.getElementById('new-total-usd').innerText = formatNumber(newTotalUsd.toFixed(2));
+
+            // New LBP cash calculation
+            let newTotalLbp = 0;
+            newTotalLbp += parseInt(document.getElementById('new-lbp-count-1000').value.replace(/,/g, '') || 0) * 1000;
+            newTotalLbp += parseInt(document.getElementById('new-lbp-count-5000').value.replace(/,/g, '') || 0) * 5000;
+            newTotalLbp += parseInt(document.getElementById('new-lbp-count-10000').value.replace(/,/g, '') || 0) * 10000;
+            newTotalLbp += parseInt(document.getElementById('new-lbp-count-20000').value.replace(/,/g, '') || 0) * 20000;
+            newTotalLbp += parseInt(document.getElementById('new-lbp-count-50000').value.replace(/,/g, '') || 0) * 50000;
+            newTotalLbp += parseInt(document.getElementById('new-lbp-count-100000').value.replace(/,/g, '') || 0) * 100000;
+
+            document.getElementById('new-total-lbp').innerText = formatNumber(newTotalLbp.toFixed(0));
+        }
+
+        function updateGrandTotalBox(grandTotal, elementId) {
+            const box = document.getElementById(elementId);
+            if (grandTotal >= 0) {
+                box.classList.add('positive');
+                box.classList.remove('negative');
+            } else {
+                box.classList.add('negative');
+                box.classList.remove('positive');
+            }
+        }
+
+        function addRow() {
+            const summaryTable = document.querySelector('.summary-table');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" placeholder="Input"></td>
+                <td><input type="text" placeholder="0" oninput="formatInput(this); updateSummaryTotals()"></td>
+                <td><input type="text" placeholder="0" oninput="formatInput(this); updateSummaryTotals()"></td>
+                <td><input type="text" placeholder="Input"></td>
+                <td><input type="text" placeholder="0" oninput="formatInput(this); updateSummaryTotals()"></td>
+                <td><input type="text" placeholder="0" oninput="formatInput(this); updateSummaryTotals()"></td>
+            `;
+            summaryTable.appendChild(newRow);
+        }
+
+        function updateSummaryTotals() {
+            let totalDebit = 0;
+            let totalCredit = 0;
+            let totalLbpDebit = 0;
+            let totalLbpCredit = 0;
+
+            const rows = document.querySelectorAll('.summary-table tr');
+            rows.forEach(row => {
+                if (row !== rows[0]) { // Skip header row
+                    const usdDebitValue = parseInt(row.children[1].querySelector('input').value.replace(/,/g, '') || 0);
+                    const usdCreditValue = parseInt(row.children[2].querySelector('input').value.replace(/,/g, '') || 0);
+                    const lbpDebitValue = parseInt(row.children[4].querySelector('input').value.replace(/,/g, '') || 0);
+                    const lbpCreditValue = parseInt(row.children[5].querySelector('input').value.replace(/,/g, '') || 0);
+
+                    totalDebit += usdDebitValue;
+                    totalCredit += usdCreditValue;
+                    totalLbpDebit += lbpDebitValue;
+                    totalLbpCredit += lbpCreditValue;
+                }
+            });
+
+            document.getElementById('total-debit').innerText = formatNumber(totalDebit.toFixed(2));
+            document.getElementById('total-credit').innerText = formatNumber(totalCredit.toFixed(2));
+            document.getElementById('total-lbp-debit').innerText = formatNumber(totalLbpDebit.toFixed(0));
+            document.getElementById('total-lbp-credit').innerText = formatNumber(totalLbpCredit.toFixed(0));
+
+            // Calculate and update Grand Total for USD
+            const grandTotalUsd = totalCredit - totalDebit;
+            document.getElementById('grand-total').innerText = formatNumber(grandTotalUsd.toFixed(2));
+            updateGrandTotalBox(grandTotalUsd, 'grand-total-box-usd');
+
+            // Calculate and update Grand Total for LBP
+            const grandTotalLbp = totalLbpCredit - totalLbpDebit;
+            document.getElementById('grand-total-lbp').innerText = formatNumber(grandTotalLbp.toFixed(0));
+            updateGrandTotalBox(grandTotalLbp, 'grand-total-box-lbp');
+        }
+
+        // Attach event listeners
+        const usdInputs = document.querySelectorAll('input[type="text"][id^="usd-count-"]');
+        const lbpInputs = document.querySelectorAll('input[type="text"][id^="lbp-count-"]');
+        const summaryInputs = document.querySelectorAll('input[type="text"][placeholder="0"]');
+
+        usdInputs.forEach(input => {
+            input.addEventListener('input', updateTotals);
+        });
+
+        lbpInputs.forEach(input => {
+            input.addEventListener('input', updateTotals);
+        });
+
+        summaryInputs.forEach(input => {
+            input.addEventListener('input', formatInput);
+        });
+    </script>
+
+</body>
+</html>

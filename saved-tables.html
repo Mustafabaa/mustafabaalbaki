@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Tables</title>
+    <style>
+        .saved-tables-view {
+            width: 100%;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+            transform: perspective(1000px) rotateX(2deg);
+            transform-style: preserve-3d;
+            transition: all 0.3s ease;
+        }
+
+        .data-table:hover {
+            transform: perspective(1000px) rotateX(0deg);
+        }
+
+        .data-table th {
+            background: linear-gradient(45deg, #007bff, #00a6ff);
+            color: white;
+            padding: 20px;
+            text-align: left;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            transform-style: preserve-3d;
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            margin: 2px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .data-table thead {
+            background: linear-gradient(45deg, #0056b3, #007bff);
+            border-radius: 10px 10px 0 0;
+        }
+
+        .data-table th:first-child {
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+
+        .data-table th:last-child {
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .data-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(222, 226, 230, 0.5);
+            position: relative;
+            background: rgba(255, 255, 255, 0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .data-table tr:hover td {
+            transform: translateZ(20px);
+            background: rgba(0, 123, 255, 0.1);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: flex-start; /* Align buttons to start */
+            gap: 8px; /* Space between buttons */
+        }
+
+        .delete-btn, .view-btn, .upload-btn {
+            transform-style: preserve-3d;
+            transition: all 0.3s ease;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .delete-btn:hover, .view-btn:hover, .upload-btn:hover {
+            transform: translateZ(10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        footer {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            perspective: 1000px;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .view-btn {
+            background: #28a745;
+        }
+
+        .view-btn:hover {
+            background: #218838;
+        }
+
+        .upload-btn {
+            background: #ffc107;
+        }
+
+        .upload-btn:hover {
+            background: #e0a800;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Saved Tables</h1>
+</header>
+
+<button class="back-btn" onclick="window.location.href='table.html'">Back to Main</button>
+
+<div class="saved-tables-view">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>From</th> <!-- Added From column -->
+                <th>To</th> <!-- Added To column -->
+                <th>Morning USD</th>
+                <th>Morning LBP</th>
+                <th>Evening USD</th>
+                <th>Evening LBP</th>
+                <th>Settlement USD</th>
+                <th>Settlement LBP</th>
+                <th>Difference</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="saved-tables-body"></tbody>
+    </table>
+</div>
+
+<footer>
+    <p>© 2023 Your Company. All rights reserved.</p>
+</footer>
+
+<script>
+    function loadSavedTables() {
+        const tableBody = document.getElementById('saved-tables-body');
+        const savedTables = JSON.parse(localStorage.getItem('savedTables')) || [];
+
+        savedTables.forEach((table, index) => {
+            const pdfName = table.pdfName || 'Upload PDF';
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${table.date}</td>
+                <td>${table.from}</td> <!-- Display From name -->
+                <td>${table.to}</td> <!-- Display To name -->
+                <td>$ ${table.usdCash}</td>
+                <td>L£ ${table.lbpCash}</td>
+                <td>$ ${table.eveningTotalUsd}</td>
+                <td>L£ ${table.eveningTotalLbp}</td>
+                <td>$ ${table.settlementUsd}</td>
+                <td>L£ ${table.settlementLbp}</td>
+                <td>$ ${table.settlementsDifference}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="view-btn" onclick="viewFullTable(${index})">View</button>
+                        <input type="file" id="pdf-upload-${index}" accept="application/pdf" style="display: none;" onchange="handleFileUpload(event, ${index})">
+                        <button class="upload-btn" id="upload-btn-${index}" onclick="document.getElementById('pdf-upload-${index}').click();">${pdfName}</button>
+                        <button class="delete-btn" onclick="deleteTable(${index})">Delete</button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function deleteTable(index) {
+        let savedTables = JSON.parse(localStorage.getItem('savedTables')) || [];
+        savedTables.splice(index, 1);
+        localStorage.setItem('savedTables', JSON.stringify(savedTables));
+        location.reload();
+    }
+
+    function handleFileUpload(event, index) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const savedTables = JSON.parse(localStorage.getItem('savedTables')) || [];
+                savedTables[index].pdfName = file.name;
+                savedTables[index].pdfData = e.target.result; // Store the PDF data URL
+                localStorage.setItem('savedTables', JSON.stringify(savedTables));
+                document.getElementById(`upload-btn-${index}`).innerText = file.name;
+                alert(`File uploaded for table ${index}: ${file.name}`);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function viewFullTable(index) {
+        const savedTables = JSON.parse(localStorage.getItem('savedTables')) || [];
+        const table = savedTables[index];
+
+        // Create a structured view for the table details
+        const tableInfo = `
+    <div style="border: 1px solid #dee2e6; border-radius: 5px; padding: 20px; background-color: #f8f9fa; margin-bottom: 20px;">
+        <h3 style="margin-bottom: 15px;">Table Details for ${table.date}</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <th style="text-align: left; padding: 8px; background-color: #007bff; color: white;">Description</th>
+                <th style="text-align: left; padding: 8px; background-color: #007bff; color: white;">Value</th>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">From</td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">${table.from}</td> <!-- Display From name -->
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">To</td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">${table.to}</td> <!-- Display To name -->
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">Morning USD</td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">$ ${table.usdCash}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">Morning LBP</td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">L£ ${table.lbpCash}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">Evening USD</td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">$ ${table.eveningTotalUsd}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">Evening LBP</td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">L£ ${table.eveningTotalLbp}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">Settlement USD</td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">$ ${table.settlementUsd}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">Settlement LBP</td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">L£ ${table.settlementLbp}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">Difference</td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">$ ${table.settlementsDifference}</td>
+            </tr>
+        </table>
+    </div>
+`;
+
+        // Display the PDF if available
+        let pdfDisplay = '';
+        if (table.pdfData) {
+            pdfDisplay = `
+                <iframe src="${table.pdfData}" width="100%" height="500px" style="border: none;"></iframe>
+            `;
+        } else {
+            pdfDisplay = '<p>No PDF uploaded for this table.</p>';
+        }
+
+        // Update the PDF display container
+        document.getElementById('pdf-display-container').innerHTML = tableInfo + pdfDisplay;
+        document.getElementById('tableModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('tableModal').style.display = 'none';
+    }
+
+    window.onload = loadSavedTables;
+</script>
+
+<div id="tableModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <h2>Table Details</h2>
+        <div id="pdf-display-container">
+            <!-- Detailed view will be displayed here -->
+        </div>
+    </div>
+</div>
+</body>
+</html>
