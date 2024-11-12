@@ -1,7 +1,9 @@
+const API_URL = 'http://YOUR_SERVER_IP:3000';
+
 async function loadSavedTables() {
     const tableBody = document.getElementById('saved-tables-body');
     try {
-        const response = await fetch('http://localhost:3000/api/tables');
+        const response = await fetch(`${API_URL}/api/tables`);
         const tables = await response.json();
         
         tableBody.innerHTML = '';
@@ -36,7 +38,7 @@ async function loadSavedTables() {
 
 async function deleteTable(id) {
     try {
-        await fetch(`http://localhost:3000/api/tables/${id}`, {
+        await fetch(`${API_URL}/api/tables/${id}`, {
             method: 'DELETE'
         });
         loadSavedTables();
